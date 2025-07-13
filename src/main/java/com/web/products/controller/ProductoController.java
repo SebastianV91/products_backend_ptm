@@ -26,14 +26,21 @@ public class ProductoController {
     }
 
     @GetMapping("/product/{id}")
-    public Producto getProduct(@PathVariable("id") Long id){
-        return productoService.getProduct(id);
+    public ResponseEntity<Producto> getProduct(@PathVariable("id") Long id){
+        return productoService.getProduct(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/product/{id}")
     @CrossOrigin
-    public Producto updateProduct(@RequestBody() Producto producto, @PathVariable("id") Long id){
-        return productoService.updateProduct(producto);
+    public ResponseEntity<Producto> updateProduct(@PathVariable("id") Long id, @RequestBody() Producto producto){
+        return productoService.getProduct(id)
+                .map(pExistente -> {
+                    producto.setId(id);
+                    return ResponseEntity.ok(productoService.addProduct(producto));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/products")
